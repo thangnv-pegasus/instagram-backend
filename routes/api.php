@@ -45,6 +45,7 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/home', [HomeController::class, 'show']);
         Route::get('posts-paginate',[HomeController::class,'postsHome']);
+        Route::get('/story-paginate',[HomeController::class,'storyPaginate']);
     })->name('user');
 
     Route::middleware('auth:api')->group(function () {

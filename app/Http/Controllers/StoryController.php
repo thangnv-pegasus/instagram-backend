@@ -15,7 +15,7 @@ class StoryController extends Controller
             $story_id = DB::table('story')->insertGetId([
                 'user_id' => auth()->user()->id,
                 'content' => $request->content ?? null,
-                'expired_at' => now()->addDay()
+                'expired_at' => now()->addDay(1)
             ]);
             $image_id = DB::table('images')->insertGetId([
                 'image_url' => $request->image_url,
