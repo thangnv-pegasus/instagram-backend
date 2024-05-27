@@ -43,7 +43,7 @@ class HomeController extends Controller
             ->orderBy('posts.created_at', 'asc')
             ->get();
 
-
+            
         for ($i = 0; $i < count($posts); $i++) {
             $check_id = [];
             $post_detail = DB::table('posts')->where('id', '=', $posts[$i]->post_id)->first();
@@ -73,6 +73,16 @@ class HomeController extends Controller
             }
             // reset key of collection
             $posts = $posts->values();
+            $check_like = DB::table('posts_like')
+            ->where('user_id','=',auth()->user()->id)
+            ->where('post_id','=',$posts[$i]->post_id)
+            ->first();
+            if($check_like){
+                $posts[$i]->is_like = true;
+            }else{
+                $posts[$i]->is_like = false;
+            }
+
             // dd($posts);
         }
 
@@ -94,7 +104,7 @@ class HomeController extends Controller
         $currentItems = $posts->slice($startIndex, $perPage)->values();
 
         // Tạo một đối tượng LengthAwarePaginator
-        $paginator = new LengthAwarePaginator($currentItems, $posts->count(), $perPage, $currentPage, [
+        $paginator = new LengthAwarePaginator($currentItems, count($posts), $perPage, $currentPage, [
             'path' => LengthAwarePaginator::resolveCurrentPath(),
         ]);
 

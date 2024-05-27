@@ -51,12 +51,13 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:api')->group(function () {
         Route::post('/create-post', [PostController::class, 'create']);
         Route::get('/my-post', [PostController::class, 'showMyPost']);
-        Route::patch('/update-mypost', [PostController::class, 'updateMyPost']);
-        Route::patch('/like-post', [LikeController::class, 'like']);
+        Route::post('/update-mypost', [PostController::class, 'updateMyPost']);
+        Route::post('/like-post', [LikeController::class, 'like']);
+        Route::post('/unlike-post', [LikeController::class, 'unlike']);
         Route::get('/recommend-post', [PostController::class, 'recommend']);
-        Route::post('/new-comment', [CommentController::class, 'create'])->middleware('auth:api');
-        Route::post('/new-child-comment', [CommentController::class, 'createChild'])->middleware('auth:api');
-        Route::patch('/like-comment', [LikeController::class, 'like'])->middleware('auth:api');
+        Route::post('/new-comment', [CommentController::class, 'create']);
+        Route::post('/new-child-comment', [CommentController::class, 'createChild']);
+        Route::patch('/like-comment', [LikeController::class, 'like']);
     })->name('post');
 
     Route::middleware('auth:api')->group(function () {
