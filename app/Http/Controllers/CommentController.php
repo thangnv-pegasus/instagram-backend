@@ -36,6 +36,39 @@ class CommentController extends Controller
         }
     }
 
+    public function show(Request $request)
+    {
+        try {
+            $postId = $request->postId;
+            $comments = DB::table('comments')
+                ->join('profile', 'profile.user_id', '=', 'comments.user_id')
+                ->where('post_id', '=', $postId)
+                ->orderByDesc('created_at')
+                ->select('comments.*', 'profile.nickname', 'profile.avatar_url')
+                ->get();
+            foreach ($comments as $key => $comment) {
+                $childCmt = DB::table('child_comment')
+                    ->join('profile', 'profile.user_id', '=', 'child_comment.user_id')
+                    ->where('comment_id', '=', $comment->id)
+                    ->where('post_id', '=', $postId)
+                    ->orderByDesc('created_at')
+                    ->select('child_comment.*', 'profile.nickname', 'profile.avatar_url')
+                    ->get();
+                $comments[$key]->child_comment = $childCmt;
+            }
+            return response([
+                'status' => 200,
+                'message' => 'get comments is successed',
+                'comments' => $comments
+            ]);
+        } catch (Exception $e) {
+            return response([
+                'status' => 400,
+                'message' => 'get comments is failed'
+            ]);
+        }
+    }
+
     public function createChild(Request $request)
     {
         try {
@@ -61,13 +94,14 @@ class CommentController extends Controller
         }
     }
 
-    public function likeComment(Request $request){
-        try{
-            if($request->type === 'parent'){
-                DB::table('comments')->where('id','=',$request->comment_id)->increment('like_total',1);
+    public function likeComment(Request $request)
+    {
+        try {
+            if ($request->type === 'parent') {
+                DB::table('comments')->where('id', '=', $request->comment_id)->increment('like_total', 1);
             }
-            if($request->type === 'child'){
-                DB::table('child_comment')->where('id','=',$request->comment_id)->increment('like_total',1);
+            if ($request->type === 'child') {
+                DB::table('child_comment')->where('id', '=', $request->comment_id)->increment('like_total', 1);
 
             }
             return response([
@@ -75,7 +109,7 @@ class CommentController extends Controller
                 'message' => 'like comment is successed',
                 "data" => $request->all()
             ]);
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return response([
                 'status' => 200,
                 'message' => 'like comment is failed',

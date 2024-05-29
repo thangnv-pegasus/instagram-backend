@@ -58,6 +58,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/new-comment', [CommentController::class, 'create']);
         Route::post('/new-child-comment', [CommentController::class, 'createChild']);
         Route::patch('/like-comment', [LikeController::class, 'like']);
+        Route::get('/comments',[CommentController::class,'show']);
     })->name('post');
 
     Route::middleware('auth:api')->group(function () {
