@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Events\CommentSent;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 
 class CommentController extends Controller
@@ -56,10 +58,29 @@ class CommentController extends Controller
                     ->get();
                 $comments[$key]->child_comment = $childCmt;
             }
+            // Số lượng item trên mỗi trang
+            $perPage = 5;
+
+            // Trang hiện tại từ query string (nếu không có thì mặc định là 1)
+            $currentPage = Paginator::resolveCurrentPage('page');
+
+            // Tạo một collection mới chứa các item cho trang hiện tại
+            $currentPageItems = $comments->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+            // Tạo LengthAwarePaginator từ collection
+            $paginatedItems = new LengthAwarePaginator(
+                $currentPageItems,
+                $comments->count(),
+                $perPage,
+                $currentPage,
+                ['path' => Paginator::resolveCurrentPath(), 'query' => $request->query()]
+            );
+
+
             return response([
                 'status' => 200,
                 'message' => 'get comments is successed',
-                'comments' => $comments
+                'comments' => $paginatedItems
             ]);
         } catch (Exception $e) {
             return response([

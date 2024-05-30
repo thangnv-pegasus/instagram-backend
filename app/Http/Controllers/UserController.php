@@ -10,17 +10,45 @@ class UserController extends Controller
 {
     public function show(Request $request)
     {
-        
-        try{
+        try {
+            $user = DB::table('users')
+                ->join('profile', 'users.id', '=', 'profile.user_id')
+                ->where('users.account_name', '=', $request->nickname)
+                ->select(
+                    'profile.nickname',
+                    'profile.avatar_url',
+                    'profile.bio',
+                    'users.created_at',
+                    'users.date_of_birth',
+                    'users.email',
+                    'users.fullname',
+                    'profile.user_id',
+                    'profile.is_company',
+                    'profile.is_real',
+                    'users.phone',
+                    'profile.priority',
+                    'users.role',
+                    'users.sex',
+                    'users.updated_at'
+                )
+                ->first();
+            if ($request->nickname === auth()->user()->account_name) {
+                $user->type = 'me';
+            } else {
+                $user->type = 'user';
+            }
+            $follower = DB::table('followers')->where('user_myfollow_id', '=', $user->user_id)->select('followers.user_id')->get();
+            $mefollow = DB::table('followers')->where('user_id', '=', $user->user_id)->select('followers.user_myfollow_id as user_follow')->get();
             return response([
                 'status' => 200,
                 'message' => 'get profile user successed',
-                'data' => DB::table('users')
-                    ->join('profile', 'users.id', '=', 'profile.user_id')
-                    ->where('users.id', '=', auth()->user()->id)
-                    ->first()
+                'user' => $user,
+                'followers' => $follower,
+                'mefollow' => $mefollow
             ]);
-        }catch(Exception $e){
+
+
+        } catch (Exception $e) {
             return response([
                 'status' => 500,
                 'message' => 'get profile user failed',
