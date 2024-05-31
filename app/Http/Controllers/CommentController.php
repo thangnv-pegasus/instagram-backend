@@ -85,7 +85,8 @@ class CommentController extends Controller
         } catch (Exception $e) {
             return response([
                 'status' => 400,
-                'message' => 'get comments is failed'
+                'message' => 'get comments is failed',
+                'request' => $request->all()
             ]);
         }
     }

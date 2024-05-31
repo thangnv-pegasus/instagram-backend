@@ -39,7 +39,7 @@ class HomeController extends Controller
         $posts = DB::table('posts')
             ->join('profile', 'profile.user_id', '=', 'posts.user_id')
             ->join('post_image', 'post_image.post_id', '=', 'posts.id')
-            ->select('posts.id as post_id', 'profile.user_id', 'post_image.images_id')
+            ->select('posts.id as post_id', 'profile.user_id', 'post_image.images_id as images')
             ->orderBy('posts.created_at', 'asc')
             ->get();
 
@@ -51,19 +51,19 @@ class HomeController extends Controller
             for ($j = $i + 1; $j < count($posts); $j++) {
                 if ($posts[$i]->post_id === $posts[$j]->post_id && $posts[$i]->user_id === $posts[$j]->user_id) {
                     $check_id[] = $j;
-                    $image = DB::table('images')->where('id', '=', $posts[$j]->images_id)->first();
-                    if (is_array($posts[$i]->images_id)) {
-                        $posts[$i]->images_id[] = $image;
+                    $image = DB::table('images')->where('id', '=', $posts[$j]->images)->first();
+                    if (is_array($posts[$i]->images)) {
+                        $posts[$i]->images[] = $image;
                     } else {
-                        $image2 = DB::table('images')->where('id', '=', $posts[$i]->images_id)->first();
-                        $posts[$i]->images_id = [$image2, $image];
+                        $image2 = DB::table('images')->where('id', '=', $posts[$i]->images)->first();
+                        $posts[$i]->images = [$image2, $image];
                     }
                 }
             }
             if (count($check_id) === 0) {
-                $image = DB::table('images')->where('id', '=', $posts[$i]->images_id)->first();
-                $posts[$i]->images_id = [];
-                $posts[$i]->images_id[] = $image;
+                $image = DB::table('images')->where('id', '=', $posts[$i]->images)->first();
+                $posts[$i]->images = [];
+                $posts[$i]->images[] = $image;
             } else {
                 foreach ($check_id as $key => $value) {
                     // dd($value, $posts[$value]);

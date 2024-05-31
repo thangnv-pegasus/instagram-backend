@@ -37,6 +37,7 @@ class UserController extends Controller
             } else {
                 $user->type = 'user';
             }
+            $user->post_length = DB::table('posts')->where('user_id','=',$user->user_id)->count();
             $follower = DB::table('followers')->where('user_myfollow_id', '=', $user->user_id)->select('followers.user_id')->get();
             $mefollow = DB::table('followers')->where('user_id', '=', $user->user_id)->select('followers.user_myfollow_id as user_follow')->get();
             return response([
@@ -71,6 +72,7 @@ class UserController extends Controller
                     'bio' => $request->bio,
                     'avatar_url' => $request->avatar_url,
                 ]);
+
             return response([
                 'status' => 200,
                 'message' => 'update profile user is successed',
@@ -86,8 +88,6 @@ class UserController extends Controller
                 'error' => $e
             ]);
         }
-
-
     }
 
     public function myFriend(Request $request)
