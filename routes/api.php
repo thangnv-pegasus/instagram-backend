@@ -28,11 +28,11 @@ Route::prefix('v1')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/register', [AuthController::class, 'register']);
 
-        Route::get('/profile', [UserController::class, 'show'])->middleware('auth:api');
-        Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
+    Route::get('/profile', [UserController::class, 'show'])->middleware('auth:api');
+    Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
-        Route::get('auth/google',[AuthController::class,'googlePage']);
-        Route::get('/auth/google/callback',[AuthController::class,'loginGoogle']);
+    Route::get('auth/google', [AuthController::class, 'googlePage']);
+    Route::get('/auth/google/callback', [AuthController::class, 'loginGoogle']);
 
     Route::middleware('auth:api')->group(function () {
         Route::post('/follow', [FollowController::class, 'follow']);
@@ -44,8 +44,8 @@ Route::prefix('v1')->group(function () {
         Route::patch('/update-role', [UserController::class, 'updateRole']);
 
         Route::get('/home', [HomeController::class, 'show']);
-        Route::get('posts-paginate',[HomeController::class,'postsHome']);
-        Route::get('/story-paginate',[HomeController::class,'storyPaginate']);
+        Route::get('posts-paginate', [HomeController::class, 'postsHome']);
+        Route::get('/story-paginate', [HomeController::class, 'storyPaginate']);
     })->name('user');
 
     Route::middleware('auth:api')->group(function () {
@@ -58,7 +58,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/new-comment', [CommentController::class, 'create']);
         Route::post('/new-child-comment', [CommentController::class, 'createChild']);
         Route::patch('/like-comment', [LikeController::class, 'like']);
-        Route::get('/comments',[CommentController::class,'show']);
+        Route::get('/comments', [CommentController::class, 'show']);
     })->name('post');
 
     Route::middleware('auth:api')->group(function () {

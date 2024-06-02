@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -37,7 +38,7 @@ class UserController extends Controller
             } else {
                 $user->type = 'user';
             }
-            $user->post_length = DB::table('posts')->where('user_id','=',$user->user_id)->count();
+            $user->post_length = DB::table('posts')->where('user_id', '=', $user->user_id)->count();
             $follower = DB::table('followers')->where('user_myfollow_id', '=', $user->user_id)->select('followers.user_id')->get();
             $mefollow = DB::table('followers')->where('user_id', '=', $user->user_id)->select('followers.user_myfollow_id as user_follow')->get();
             return response([
@@ -63,12 +64,50 @@ class UserController extends Controller
     {
 
         try {
-            DB::table('users')->update([
-                'account_name' => $request->nickname ?? auth()->user()->account_name
-            ]);
-            DB::table('profile')->where('user_id', '=', auth()->user()->id)
+            // Định nghĩa các quy tắc xác thực
+            $rules = [
+                'nickname' => 'required|max:255',
+                'fullname' => 'required|max:255',
+                'email' => 'email',
+                'phone' => 'required | regex:/^(\+84|0)(3|5|7|8|9)[0-9]{8}$/',
+                'dob' => 'required | date'
+            ];
+
+            // Định nghĩa các thông báo lỗi tùy chỉnh
+            $messages = [
+                'nickname.required' => 'Tên tài khoản là bắt buộc.',
+                'nickname.max' => 'Tên tài khoản không được vượt quá :max ký tự.',
+                'fullname.required' => 'Họ tên là bắt buộc.',
+                'fullname.max' => 'Họ tên không được vượt quá :max ký tự.',
+                'email.email' => 'Hãy nhập đúng địa chỉ email',
+                'phone.required' => 'Hãy nhập số điện thoại',
+                'phone.regex' => 'Hãy nhập số điện thoại hợp lệ',
+                'dob.required' => 'Hãy nhập ngày sinh',
+                'dob.date' => 'Hãy nhập đúng định dạng ngày/tháng/năm'
+            ];
+            // Tạo validator với các quy tắc và thông báo lỗi tùy chỉnh
+            $validator = Validator::make($request->all(), $rules, $messages);
+            if ($validator->fails()) {
+                return response([
+                    'status' => 500,
+                    'message' => 'update profile user is failed',
+                    'error' => $validator->errors()
+                ]);
+            }
+            DB::table('users')
+                ->where('id', '=', auth()->user()->id)
                 ->update([
-                    'nickname' => $request->nickname ?? auth()->user()->account_name,
+                    'account_name' => $request->nickname,
+                    'fullname' => $request->fullname,
+                    'email' => $request->email,
+                    'phone' => $request->phone,
+                    'sex' => $request->sex,
+                    'date_of_birth' => $request->dob
+                ]);
+            DB::table('profile')
+                ->where('user_id', '=', auth()->user()->id)
+                ->update([
+                    'nickname' => $request->nickname,
                     'bio' => $request->bio,
                     'avatar_url' => $request->avatar_url,
                 ]);
@@ -76,15 +115,16 @@ class UserController extends Controller
             return response([
                 'status' => 200,
                 'message' => 'update profile user is successed',
-                'new-data' => DB::table('users')
+                'user' => DB::table('users')
                     ->join('profile', 'users.id', '=', 'profile.user_id')
                     ->where('users.id', '=', auth()->user()->id)
                     ->first()
             ]);
+
         } catch (Exception $e) {
             return response([
-                'status' => 200,
-                'message' => 'update profile user is successed',
+                'status' => 500,
+                'message' => 'update profile user is failed',
                 'error' => $e
             ]);
         }
